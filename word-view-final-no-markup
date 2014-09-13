@@ -1,0 +1,16 @@
+' Final Showing Markup *is* shown by default if changes are tracked on a document. For example, edit a document of your own, track changes, then send it to a friend. Even though your friend doesn't want to see the markup, they *WILL* because it's there. This little VBA macro makes it so that you won't see the markup by default anymore, and instead will see the Final (without markup) view.
+
+' Just dump these lines into a module in your Normal template (hit ALT+F11 to start up the Visual Basic Editor, right click Modules under
+' the -Normal- directory and add a Module). Since the name of this sub is "AutoOpen," it will execute whenever you open a document.
+
+
+'''''''' VB Start '''''''''
+Sub AutoOpen()
+  With ActiveWindow.View
+    .ShowRevisionsAndComments = False
+    .RevisionsView = wdRevisionsViewFinal
+  End With
+  CommandBars("Reviewing").Visible = False
+  '''OPTIONAL: previous line turns off Reviewing toolbar
+End Sub
+''''''''' VB End '''''''''
