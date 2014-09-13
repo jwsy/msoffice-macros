@@ -1,0 +1,69 @@
+Sub Aggregate()
+    ' jyeee, 18 Apr 06
+    
+    Dim insertPoint, numParts, FilePaths As Variant
+    ' Make slidemakers upload slides to reachable directories***
+    '       \\path\to\ppts
+    ' Make slidemakers provide own title slide***
+    
+    ' ###############################################
+    ' Have to hand-jam, force slidemakers to standardize name***
+    ' Look out for commas --the last entry should not have one
+    FilePaths = Array( _
+        "\\path\to\ppts\OSW.ppt", _
+        "\\path\to\ppts\CP.ppt", _
+        "\\path\to\ppts\MXG.ppt", _
+        "\\path\to\ppts\OSO.ppt", _
+        "\\path\to\ppts\OG.ppt", _
+        "\\path\to\ppts\MDG.ppt", _
+        "\\path\to\ppts\MSG.ppt", _
+        "\\path\to\ppts\CCP.ppt", _
+        "\\path\to\ppts\DS.ppt", _
+        "\\path\to\ppts\PA.ppt" _
+        )
+        
+    numParts = UBound(FilePaths) - LBound(FilePaths) + 1
+    
+    '"\\path\to\ppts\OSA.ppt", _
+
+    ' ***ENSURE numParts and the # of paths in FilePaths ARE CONSISTENT***
+    ' ###############################################
+
+    ' Template should only have first and last slides
+    ' Following code ensures this condition
+    If ActivePresentation.Slides.Count = 2 Then
+        ' Good! NSW ;)
+    ElseIf ActivePresentation.Slides.Count < 2 Then
+        ' Bad.  Quit for now.
+        MsgBox "Two there must be, a master and an apprentice"
+        Exit Sub
+    Else
+        ' Bad -- there are more than two
+        ' Assume that the first and last slides are correct
+        '  and delete all in the middle
+        Dim MyMsg, MyTitle, Response
+        MyMsg = "Confirm deletion of slides 2-" & (ActivePresentation.Slides.Count - 1)
+        MyTitle = "WARNING!"
+        Response = MsgBox(Prompt:=MyMsg, Buttons:=vbYesNo + vbExclamation, Title:=MyTitle)
+        Select Case Response
+            Case Is = vbYes
+                Do While ActivePresentation.Slides.Count > 2
+                    ActivePresentation.Slides(2).Delete
+                    ' M$ inconsistent array numbering, this starts with 1 :(
+                Loop
+            Case Is = vbNo
+                Exit Sub
+        End Select
+    End If
+    
+    ' M$ correct inconsistency --arrays start with 0 :)
+    For i = 0 To numParts - 1
+        ' Insert to the second-to-last slide to maintain order
+            '   A.Z   -B->  ABZ
+            '   AB.Z  -C->  ABCZ
+            '   ABC.Z -D->  ABCDZ
+        insertPoint = ActivePresentation.Slides.Count - 1
+        ActivePresentation.Slides.InsertFromFile _
+            FilePaths(i), insertPoint
+    Next i
+End Sub
