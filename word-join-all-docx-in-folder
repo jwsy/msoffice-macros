@@ -1,0 +1,55 @@
+' Join or combine all docx files in a folder
+' Hat tip to Pathagoras1953, adapted from http://forums.macrumors.com/showthread.php?t=1216806
+
+' ===== JoinAllDocxInFolder
+Sub JoinAllDocxInFolder
+  'MAC VBA does not support wildcards in DIR function
+  'So fake it.
+
+  Dim folderPath As String
+  ' folderpath = "MacintoshHD:Users:jyee:Desktop:word_docs:docs"
+  folderpath = "C:\Users\rhl\Desktop\docs"
+  folderPath = folderPath & Application.PathSeparator
+  Dim filetype As String
+  filetype = "docx"
+
+  Dim MainDoc As Document
+  Set MainDoc = Documents.Add
+  Dim file As String
+  Dim rng As Range
+  Dim oCollection As New Collection
+
+  file = Dir$(folderPath) 'setup initial file
+ 
+  Do While Len(file)
+    If InStr(filetype, "*") Then
+      'if a star exists in the call, just look for that text
+      'within the initial characters of the extension
+      '(extension presumed 4 characters max, plus the period)
+      If InStr(Right(file, 5), filetype) Then
+        oCollection.Add folderPath & file
+        If file <> ActiveDocument.Name Then
+          ' iRet = MsgBox(folderPath & file, vbOKOnly, "Aloha")
+          Set rng = MainDoc.Range
+          rng.Collapse wdCollapseEnd
+          rng.InsertFile folderPath & file
+        End If
+      End If
+    Else
+      'if no star in the call, then test if extensions match
+      If Right(file, Len(filetype)) = filetype Then
+        oCollection.Add folderPath & file
+        If file <> ActiveDocument.Name Then
+          ' iRet = MsgBox(folderPath & file, vbOKOnly, "Aloha")
+          Set rng = MainDoc.Range
+          rng.Collapse wdCollapseEnd
+          rng.InsertFile folderPath & file
+        End If
+      End If
+    End If
+    'read next item
+    file = Dir$
+  Loop
+
+End Sub 
+' =========
