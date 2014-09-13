@@ -1,0 +1,128 @@
+Sub ReformatSugarStatus()
+'
+' ReformatSugarStatus Macro
+' Reformats Sugar Status into something printable
+'
+ 
+    ' Disable AutoFilter and do formatting
+    ActiveSheet.AutoFilterMode = False
+    ActiveWindow.View = xlNormalView
+    Range("B2").Select
+    ActiveWindow.FreezePanes = True
+    Cells.Select
+    With Selection
+        .HorizontalAlignment = xlGeneral
+        .VerticalAlignment = xlTop
+        .WrapText = True
+        .ShrinkToFit = False
+        .MergeCells = False
+    End With
+    With Selection.Font
+        .Name = "Arial"
+        .Size = 10
+        .Underline = xlUnderlineStyleNone
+    End With
+    Columns("A:B").ColumnWidth = 14
+    Columns("C:C").ColumnWidth = 9
+    Columns("C:C").Select
+    Selection.NumberFormat = "$#,##0"
+    Columns("D:F").ColumnWidth = 7.67
+    Columns("G:G").ColumnWidth = 8
+    Columns("H:H").ColumnWidth = 8
+    Columns("J:K").ColumnWidth = 20
+    ActiveSheet.PageSetup.PrintArea = ""
+    With ActiveSheet.PageSetup
+        .Orientation = xlLandscape
+    End With
+    ActiveSheet.Range("a2", ActiveSheet.Range("a2").End(xlDown)).Select
+    Selection.RowHeight = 72
+    Rows("1:1").Select
+    Selection.Font.Bold = True
+     
+    ' Use the AutoFilter to sort and filter on User Name, Account, and Expected Close Date
+    Selection.AutoFilter
+    ActiveWorkbook.ActiveSheet.AutoFilter.Sort.SortFields.Clear
+    ActiveWorkbook.ActiveSheet.AutoFilter.Sort.SortFields _
+        .Add Key:=Range("H1:H99"), SortOn:=xlSortOnValues, Order:=xlAscending, _
+        DataOption:=xlSortNormal
+    With ActiveWorkbook.ActiveSheet.AutoFilter.Sort
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    ActiveWorkbook.ActiveSheet.AutoFilter.Sort.SortFields _
+        .Add Key:=Range("F1:F99"), SortOn:=xlSortOnValues, Order:=xlAscending, _
+        DataOption:=xlSortNormal
+    With ActiveWorkbook.ActiveSheet.AutoFilter.Sort
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+     
+    ' Filter out "Closed Won" entries
+    ActiveSheet.Range("$A$1:$L$999").AutoFilter Field:=4, Criteria1:="<>*Closed*"
+ 
+' End Sub
+' Sub SummarySugarStats()
+'
+' Summary Stats
+'
+    ' Populate table for Last Week
+    Rows("1:1").Select
+    Selection.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
+    Selection.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
+    Selection.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
+    Range("B1").FormulaR1C1 = "Closed Won"
+    Range("C1").FormulaR1C1 = "Pipeline Gross"
+    Range("D1").FormulaR1C1 = "Pipeline Gross Prospecting (=1)"
+    Range("E1").FormulaR1C1 = "Pipeline Gross Sales Active (>=2)"
+    Range("F1").FormulaR1C1 = "Pipeline Expected Sales Active (>=2)"
+    Range("B2").FormulaR1C1 = "=SUMIF(R[3]C[2]:R[997]C[2],""Closed Won"",R[3]C[1]:R[997]C[1])"
+    Range("C2").FormulaR1C1 = "=SUM(R[3]C:R[997]C)-RC[-1]"
+    Range("D2").FormulaR1C1 = "=SUMIF(R[3]C:R[997]C,""1*"",R[3]C[-1]:R[997]C[-1])"
+    Range("E2").FormulaR1C1 = "=SUMIF(R[3]C[-1]:R[997]C[-1],"">1*"",R[3]C[-2]:R[997]C[-2])-RC[-3]"
+    Range("F2").FormulaR1C1 = _
+        "=SUMPRODUCT(R[3]C[-3]:R[997]C[-3], R[3]C[-1]:R[997]C[-1], --(R[3]C[-2]:R[997]C[-2]>""1*""))/100-RC[-4]"
+    Rows("1:1").Font.Bold = True
+    Columns("B:F").ColumnWidth = 15
+    Rows("2:3").Style = "Currency"
+    Rows("3:3").Select
+    Selection.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
+    Selection.Insert Shift:=xlDown, CopyOrigin:=xlFormatFromLeftOrAbove
+ 
+    Range("A2").FormulaR1C1 = "This Week"
+    Range("A3").FormulaR1C1 = "Last Week"
+    Range("A4").FormulaR1C1 = "+/-"
+     
+    Range("B4").FormulaR1C1 = "=R[-2]C-R[-1]C"
+    Range("C4").FormulaR1C1 = "=R[-2]C-R[-1]C"
+    Range("D4").FormulaR1C1 = "=R[-2]C-R[-1]C"
+    Range("E4").FormulaR1C1 = "=R[-2]C-R[-1]C"
+    Range("F4").FormulaR1C1 = "=R[-2]C-R[-1]C"
+     
+    ' +/- icons for auto filter
+    Range("B4:F4").Select
+    Selection.FormatConditions.AddIconSetCondition
+    Selection.FormatConditions(Selection.FormatConditions.Count).SetFirstPriority
+    With Selection.FormatConditions(1)
+        .ReverseOrder = False
+        .ShowIconOnly = False
+        .IconSet = ActiveWorkbook.IconSets(xl3Triangles)
+    End With
+    With Selection.FormatConditions(1).IconCriteria(2)
+        .Type = xlConditionValueNumber
+        .Value = 0
+        .Operator = 7
+    End With
+    With Selection.FormatConditions(1).IconCriteria(3)
+        .Type = xlConditionValueNumber
+        .Value = 0
+        .Operator = 5
+    End With
+     
+    Range("A1").Select
+End Sub
